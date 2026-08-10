@@ -5,7 +5,7 @@ class User(AbstractUser):
     ROLE_CHOICES=[('CANDIDATE', 'Candidate'), ('RECRUITER', 'Recruiter')]
 
     role=models.CharField(max_length=10, choices=ROLE_CHOICES)
-
+    mobile_no=models.CharField(max_length=15, unique=True)
 
 class Profile(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE)
