@@ -7,6 +7,7 @@ class Recruitment(models.Model):
     employment_type=models.CharField(max_length=10, choices=[('INTERNSHIP', 'Internship'), ('PART-TIME', 'Part-Time'), ('FULL-TIME', 'Full-Time')])
     job_description=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
+    is_active=models.BooleanField(default=False)
 
     def __str__(self):
         return self.organisation_name.name
