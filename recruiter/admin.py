@@ -1,3 +1,4 @@
 from django.contrib import admin
+from recruiter.models import Recruitment
 
-# Register your models here.
+admin.site.register(Recruitment)

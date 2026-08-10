@@ -10,6 +10,7 @@ class User(AbstractUser):
 class Company(models.Model):
     name=models.CharField(max_length=100)
     description=models.TextField()
+    created_at=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -19,6 +20,7 @@ class RecruiterProfile(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE)
     display_name=models.CharField()
     gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')], blank=True, null=True)
+    created_at=models.DateTimeField(auto_now_add=True)
     
     def save(self,*args, **kwargs):
         self.display_name=f"{self.user.first_name} {self.user.last_name}"
@@ -29,6 +31,7 @@ class UserProfile(models.Model):
     display_name=models.CharField()
     bio=models.TextField(blank=True, null=True)
     gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')], blank=True, null=True)
+    created_at=models.DateTimeField(auto_now_add=True)
 
     def save(self,*args, **kwargs):
         self.display_name=f"{self.user.first_name} {self.user.last_name}"
