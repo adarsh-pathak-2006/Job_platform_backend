@@ -12,7 +12,6 @@ class Profile(models.Model):
     display_name=models.CharField()
     bio=models.TextField(blank=True, null=True)
     gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')], blank=True, null=True)
-    education=models.TextField(blank=True, null=True)
 
     def save(self,*args, **kwargs):
         self.display_name=f"{self.user.first_name} {self.user.last_name}"
@@ -27,6 +26,7 @@ class Resume(models.Model):
     name=models.CharField(max_length=100)
     gender=models.CharField(choices=[('MALE', 'Male'), ('FEMALE', 'Female')])
     summary=models.TextField()
+    education=models.TextField()
     linkedin=models.URLField(blank=True, null=True)
     github=models.CharField(blank=True, null=True)
     twitter=models.URLField(blank=True, null=True)
