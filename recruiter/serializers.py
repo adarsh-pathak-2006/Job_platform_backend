@@ -11,8 +11,8 @@ class RecruiterGetSerializer(ModelSerializer):
         fields='__all__'
 
 class RecruiterWriteSerializer(ModelSerializer):
-    profile=PrimaryKeyRelatedField(queryset=RecruiterProfile.objects.all())
     organisation_name=PrimaryKeyRelatedField(queryset=Company.objects.all())
     class Meta:
         model=Recruitment
         fields='__all__'
+        read_only_fields=['profile']
