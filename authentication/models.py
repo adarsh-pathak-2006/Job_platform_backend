@@ -7,7 +7,24 @@ class User(AbstractUser):
     role=models.CharField(max_length=10, choices=ROLE_CHOICES)
     mobile_no=models.CharField(max_length=15, unique=True)
 
-class Profile(models.Model):
+class Company(models.Model):
+    name=models.CharField(max_length=100)
+    description=models.TextField()
+
+    def __str__(self):
+        return self.name
+
+class RecruiterProfile(models.Model):
+    company=models.ForeignKey(Company, on_delete=models.CASCADE)
+    user=models.OneToOneField(User, on_delete=models.CASCADE)
+    display_name=models.CharField()
+    gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')], blank=True, null=True)
+    
+    def save(self,*args, **kwargs):
+        self.display_name=f"{self.user.first_name} {self.user.last_name}"
+        return super().save(*args, **kwargs)
+
+class UserProfile(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE)
     display_name=models.CharField()
     bio=models.TextField(blank=True, null=True)
@@ -22,7 +39,7 @@ class Profile(models.Model):
 
 class Resume(models.Model):
     resume_name=models.CharField(max_length=100)
-    profile=models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='resumes')
+    profile=models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='resumes')
     name=models.CharField(max_length=100)
     gender=models.CharField(choices=[('MALE', 'Male'), ('FEMALE', 'Female')])
     summary=models.TextField()
