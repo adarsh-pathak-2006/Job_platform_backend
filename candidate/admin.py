@@ -1,3 +1,4 @@
 from django.contrib import admin
+from candidate.models import Application
 
-# Register your models here.
+admin.site.register(Application)
