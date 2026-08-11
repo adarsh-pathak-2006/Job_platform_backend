@@ -3,14 +3,14 @@ from recruiter.models import Recruitment, Company
 from authentication.serializers import RecruiterProfileGetSerializer, CompanySerializer
 from authentication.models import RecruiterProfile
 
-class RecruiterGetSerializer(ModelSerializer):
+class RecruitmentGetSerializer(ModelSerializer):
     profile=RecruiterProfileGetSerializer(read_only=True)
     organisation_name=CompanySerializer(read_only=True)
     class Meta:
         model=Recruitment
         fields='__all__'
 
-class RecruiterWriteSerializer(ModelSerializer):
+class RecruitmentWriteSerializer(ModelSerializer):
     organisation_name=PrimaryKeyRelatedField(queryset=Company.objects.all())
     class Meta:
         model=Recruitment
