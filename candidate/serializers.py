@@ -2,7 +2,6 @@ from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 from candidate.models import Application
 from authentication.serializers import UserProfileGetSerializer
 from recruiter.serializers import RecruiterGetSerializer
-from authentication.models import UserProfile
 from recruiter.models import Recruitment
 
 class ApplicationSerializer(ModelSerializer):
