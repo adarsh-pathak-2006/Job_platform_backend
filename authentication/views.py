@@ -6,10 +6,22 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView
+from job.permissions import IsCandidate, IsRecruiterAndCandidate
+from rest_framework.permissions import IsAdminUser
+from job.throttling import GeneralThrottle, RegisterUserThrottle, TokenCreationThrottle, RefreshTokenCreationThrottle
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 
 User=get_user_model()
 
+class CustomTokenObtainView(TokenObtainPairView):
+    throttle_classes=[TokenCreationThrottle]
+
+class CustomTokenRefreshView(TokenRefreshView):
+    throttle_classes=[RefreshTokenCreationThrottle]
+
 class RegisterAPI(APIView):
+    throttle_classes=[RegisterUserThrottle]
     def post(self, request):
         serial=RegisterSerializer(data=request.data)
         if serial.is_valid():
@@ -32,30 +44,50 @@ class RegisterAPI(APIView):
         return Response(serial.errors, status=400)
 
 class CompanyAPI(ListCreateAPIView):
+    throttle_classes=[GeneralThrottle]
+    def get_permissions(self):
+        if self.request.method=='GET':
+            return [IsRecruiterAndCandidate()]
+        return [IsAdminUser()]
     serializer_class=CompanySerializer
     queryset=Company.objects.all()
 
 class CompanyDetailAPI(RetrieveUpdateDestroyAPIView):
+    throttle_classes=[GeneralThrottle]
+    def get_permissions(self):
+        if self.request.method=='GET':
+            return [IsRecruiterAndCandidate()]
+        return [IsAdminUser()]
     serializer_class=CompanySerializer
     queryset=Company.objects.all()
 
 class UserProfileAPI(ListAPIView):
+    throttle_classes=[GeneralThrottle]
+    permission_classes=[IsRecruiterAndCandidate]
     serializer_class=UserProfileGetSerializer
     queryset=UserProfile.objects.all()
 
 class UserProfileIndividualAPI(RetrieveAPIView):
+    throttle_classes=[GeneralThrottle]
+    permission_classes=[IsRecruiterAndCandidate]
     serializer_class=UserProfileGetSerializer
     queryset=UserProfile.objects.all()
 
 class RecruiterProfileAPI(ListAPIView):
+    throttle_classes=[GeneralThrottle]
+    permission_classes=[IsRecruiterAndCandidate]
     serializer_class=RecruiterProfileGetSerializer
     queryset=RecruiterProfile.objects.all()
 
 class RecruiterProfileIndividualAPI(RetrieveAPIView):
+    throttle_classes=[GeneralThrottle]
+    permission_classes=[IsRecruiterAndCandidate]
     serializer_class=RecruiterProfileGetSerializer
     queryset=RecruiterProfile.objects.all()
 
 class MyProfile(RetrieveUpdateDestroyAPIView):
+    throttle_classes=[GeneralThrottle]
+    permission_classes=[IsRecruiterAndCandidate]
     def get_serializer_class(self):
         if self.request.user.role=='Candidate':
             return UserProfileWriteSerializer
@@ -69,6 +101,11 @@ class MyProfile(RetrieveUpdateDestroyAPIView):
             return get_object_or_404(RecruiterProfile, user=self.request.user)       
 
 class ResumeAPI(ListCreateAPIView):
+    throttle_classes=[GeneralThrottle]
+    def get_permissions(self):
+        if self.request.method=='POST':
+            return [IsCandidate()]
+        return [IsRecruiterAndCandidate()]
     serializer_class=ResumeSerializer
 
     def get_queryset(self):
@@ -76,6 +113,11 @@ class ResumeAPI(ListCreateAPIView):
         return Resume.objects.filter(profile=profile_data)
 
 class ResumeDetailAPI(RetrieveUpdateDestroyAPIView):
+    throttle_classes=[GeneralThrottle]
+    def get_permissions(self):
+        if self.request.method=='PUT' or self.request.method=='DELETE':
+            return [IsCandidate()]
+        return [IsRecruiterAndCandidate()]
     serializer_class=ResumeSerializer
     
     def get_queryset(self):
@@ -83,6 +125,11 @@ class ResumeDetailAPI(RetrieveUpdateDestroyAPIView):
         return Resume.objects.filter(profile=profile_data)
 
 class ExperienceAPI(APIView):
+    throttle_classes=[GeneralThrottle]
+    def get_permissions(self):
+        if self.request.method=='POST':
+            return [IsCandidate()]
+        return [IsRecruiterAndCandidate()]
     def get(self, request, pk):
         profile_data=get_object_or_404(UserProfile, user=request.user)
         resume_data=get_object_or_404(Resume,profile=profile_data, id=pk)
@@ -100,6 +147,11 @@ class ExperienceAPI(APIView):
         return Response(serial.errors, status=400)
 
 class ExperienceIndividualAPI(APIView):
+    throttle_classes=[GeneralThrottle]
+    def get_permissions(self):
+        if self.request.method=='PUT' or self.request.method=='DELETE':
+            return [IsCandidate()]
+        return [IsRecruiterAndCandidate()]
     def get(self, request, pk, ck):
         profile_data=get_object_or_404(UserProfile, user=request.user)
         resume_data=get_object_or_404(Resume,profile=profile_data, id=pk)
@@ -125,6 +177,11 @@ class ExperienceIndividualAPI(APIView):
         return Response(status=204)
 
 class ProjectAPI(ListCreateAPIView):
+    throttle_classes=[GeneralThrottle]
+    def get_permissions(self):
+        if self.request.method=='POST':
+            return [IsCandidate()]
+        return [IsRecruiterAndCandidate()]
     def get(self, request, pk):
         profile_data=get_object_or_404(UserProfile, user=request.user)
         resume_data=get_object_or_404(Resume,profile=profile_data, id=pk)
@@ -142,6 +199,11 @@ class ProjectAPI(ListCreateAPIView):
         return Response(serial.errors, status=400)   
 
 class ProjectIndividualAPI(APIView):
+    throttle_classes=[GeneralThrottle]
+    def get_permissions(self):
+        if self.request.method=='PUT' or self.request.method=='DELETE':
+            return [IsCandidate()]
+        return [IsRecruiterAndCandidate()]
     def get(self, request, pk, ck):
         profile_data=get_object_or_404(UserProfile, user=request.user)
         resume_data=get_object_or_404(Resume,profile=profile_data, id=pk)
