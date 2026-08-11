@@ -1,7 +1,7 @@
 from candidate.models import Application
 from candidate.serializers import ApplicationSerializer, ApplicationWriteSerializer
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveDestroyAPIView
-from job.throttling import GeneralThrottle
+from job.throttling import GeneralThrottle, ApplicationCreationThrottle
 from job.permissions import IsCandidate, IsRecruiterAndCandidate
 
 class ApplicationListAPI(ListAPIView):
@@ -11,7 +11,7 @@ class ApplicationListAPI(ListAPIView):
     queryset=Application.objects.all()
 
 class ApplicationCreateAPI(CreateAPIView):
-    throttle_classes=[GeneralThrottle]
+    throttle_classes=[ApplicationCreationThrottle]
     permission_classes=[IsCandidate]
     serializer_class=ApplicationWriteSerializer
     queryset=Application.objects.all()
