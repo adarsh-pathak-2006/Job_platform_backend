@@ -1,21 +1,17 @@
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from recruiter.models import Recruitment
-from recruiter.serializers import RecruitmentGetSerializer, RecruitmentWriteSerializer
+from recruiter.serializers import RecruitmentSerializer
 
 class RecruitmentActiveAPI(ListAPIView):
-    serializer_class=RecruitmentGetSerializer
+    serializer_class=RecruitmentSerializer
     def get_queryset(self):
         return Recruitment.objects.filter(is_active=True)
 
-class RecruitmentAllAPI(ListAPIView):
-    serializer_class=RecruitmentGetSerializer
-    queryset=Recruitment.objects.all()
-
-class RecruitmentCreateAPI(CreateAPIView):
-    serializer_class=RecruitmentWriteSerializer
+class RecruitmentAllAPI(ListCreateAPIView):
+    serializer_class=RecruitmentSerializer
     queryset=Recruitment.objects.all()
 
 class RecruitmentUpdateAPI(RetrieveUpdateDestroyAPIView):
-    serializer_class=RecruitmentWriteSerializer
+    serializer_class=RecruitmentSerializer
     queryset=Recruitment.objects.all()
 

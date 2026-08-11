@@ -16,7 +16,7 @@ class Company(models.Model):
         return self.name
 
 class RecruiterProfile(models.Model):
-    company=models.ForeignKey(Company, on_delete=models.CASCADE)
+    company=models.OneToOneField(Company, on_delete=models.CASCADE)
     user=models.OneToOneField(User, on_delete=models.CASCADE)
     display_name=models.CharField()
     gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')], blank=True, null=True)
