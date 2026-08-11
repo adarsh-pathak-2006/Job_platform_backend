@@ -9,7 +9,7 @@ class UserSerializer(ModelSerializer):
 class RegisterSerializer(ModelSerializer):
     class Meta:
         model=User
-        fields=['first_name', 'last_name', 'username', 'email', 'mobile_no', 'password']
+        fields=['first_name', 'last_name', 'username', 'email', 'mobile_no', 'password', 'role']
 
 class UserProfileGetSerializer(ModelSerializer):
     user=UserSerializer(read_only=True)
