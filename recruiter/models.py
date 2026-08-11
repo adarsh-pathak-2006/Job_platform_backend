@@ -2,7 +2,7 @@ from django.db import models
 from authentication.models import RecruiterProfile, Company
 
 class Recruitment(models.Model):
-    profile=models.ForeignKey(RecruiterProfile, on_delete=models.CASCADE)
+    profile=models.ForeignKey(RecruiterProfile, on_delete=models.CASCADE, related_name='posting_by_recruiter')
     organisation_name=models.CharField()
     employment_type=models.CharField(max_length=10, choices=[('INTERNSHIP', 'Internship'), ('PART-TIME', 'Part-Time'), ('FULL-TIME', 'Full-Time')])
     job_description=models.TextField()

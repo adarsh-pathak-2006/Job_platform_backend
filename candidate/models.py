@@ -4,9 +4,9 @@ from recruiter.models import Recruitment
 
 
 class Application(models.Model):
-    user=models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    job=models.ForeignKey(Recruitment, on_delete=models.CASCADE)
-    resume=models.ForeignKey(Resume, on_delete=models.CASCADE)
+    user=models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='applications_user')
+    job=models.ForeignKey(Recruitment, on_delete=models.CASCADE, related_name='applications_job')
+    resume=models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='application_resume')
     created_at=models.DateTimeField(auto_now_add=True)
 
     class Meta:

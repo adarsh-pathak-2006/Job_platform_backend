@@ -16,7 +16,7 @@ class Company(models.Model):
         return self.name
 
 class RecruiterProfile(models.Model):
-    company=models.OneToOneField(Company, on_delete=models.CASCADE)
+    company=models.ForeignKey(Company, on_delete=models.CASCADE, related_name='recruiter_in_company')
     user=models.OneToOneField(User, on_delete=models.CASCADE)
     display_name=models.CharField()
     gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')], blank=True, null=True)
@@ -55,7 +55,7 @@ class Resume(models.Model):
         return f"{self.resume_name} of {self.profile.display_name}"
 
 class Experience(models.Model):
-    resume=models.ForeignKey(Resume, on_delete=models.CASCADE)
+    resume=models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='experience_in_resume')
     organisation_name=models.CharField(max_length=300)
     experience_type=models.CharField(max_length=10, choices=[('INTERNSHIP', 'Internship'), ('PART-TIME', 'Part-Time'), ('FULL-TIME', 'Full-Time')])
     description=models.TextField(blank=True, null=True)
@@ -67,7 +67,7 @@ class Experience(models.Model):
 
     
 class Project(models.Model):
-    resume=models.ForeignKey(Resume, on_delete=models.CASCADE)
+    resume=models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='project_in_resume')
     name=models.CharField(max_length=150)
     description=models.TextField()
     live_link=models.URLField(null=True)
