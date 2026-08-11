@@ -2,7 +2,7 @@ from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpda
 from recruiter.models import Recruitment
 from recruiter.serializers import RecruitmentSerializer
 from job.throttling import GeneralThrottle, RecruitmentPostingThrottle
-from job.permissions import IsRecruiterAndCandidate, IsCandidate, IsRecruiter
+from job.permissions import IsRecruiterAndCandidate, IsRecruiter
 
 class RecruitmentActiveAPI(ListAPIView):
     throttle_classes=[GeneralThrottle]
