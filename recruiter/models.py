@@ -1,5 +1,5 @@
 from django.db import models
-from authentication.models import RecruiterProfile, Company
+from authentication.models import RecruiterProfile
 
 class Recruitment(models.Model):
     profile=models.ForeignKey(RecruiterProfile, on_delete=models.CASCADE, related_name='posting_by_recruiter')
