@@ -5,13 +5,13 @@ User=get_user_model()
 
 class IsRecruiter(BasePermission):
     def has_permission(self, request, view):
-        return (request.user.is_authenticated and request.user.role==User.Recruiter)
+        return (request.user.is_authenticated and request.user.role == 'RECRUITER')
 
 class IsCandidate(BasePermission):
     def has_permission(self, request, view):
-        return (request.user.is_authenticated and request.user.role == User.Candidate)
+        return (request.user.is_authenticated and request.user.role == 'CANDIDATE')
 
 class IsRecruiterAndCandidate(BasePermission):
     def has_permission(self, request, view):
-        return (request.user.is_authenticated and request.user.role in [User.Candidate, User.Recruiter])
+        return (request.user.is_authenticated and request.user.role in ['CANDIDATE', 'RECRUITER'])
         

@@ -14,5 +14,5 @@ class Recruitment(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.organisation_name.name
+        return self.organisation_name
 

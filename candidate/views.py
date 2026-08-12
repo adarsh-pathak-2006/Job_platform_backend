@@ -4,6 +4,8 @@ from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
+from rest_framework.exceptions import ValidationError
+from django.db import IntegrityError
 
 from candidate.models import Application
 from candidate.serializers import (
@@ -78,8 +80,10 @@ class ApplicationCreateAPI(CreateAPIView):
             UserProfile,
             user=self.request.user
         )
-
-        application = serializer.save(user=profile)
+        try:
+            application = serializer.save(user=profile)
+        except IntegrityError:
+            raise ValidationError({'detail': 'You have already applied for this job.'})
 
         # Candidate's application list is now outdated
         cache.delete(
