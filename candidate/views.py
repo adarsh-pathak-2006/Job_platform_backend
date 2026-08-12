@@ -27,6 +27,7 @@ from job.permissions import (
 class ApplicationListAPI(APIView):
     throttle_classes = [GeneralThrottle]
     permission_classes = [IsRecruiterAndCandidate]
+    serializer_class = ApplicationSerializer
 
     def get(self, request, pk):
         job = get_object_or_404(Recruitment, id=pk)
@@ -48,6 +49,7 @@ class ApplicationListAPI(APIView):
 class ApplicationUserAPI(APIView):
     throttle_classes = [GeneralThrottle]
     permission_classes = [IsCandidate]
+    serializer_class = ApplicationSerializer
 
     def get(self, request):
         profile = get_object_or_404(
@@ -99,6 +101,7 @@ class ApplicationCreateAPI(CreateAPIView):
 class ApplicationUserDetailAPI(APIView):
     throttle_classes = [GeneralThrottle]
     permission_classes = [IsCandidate]
+    serializer_class = ApplicationSerializer
 
     def get(self, request, pk):
         profile = get_object_or_404(
@@ -164,6 +167,7 @@ class ApplicationUserDetailAPI(APIView):
 
 class ApplicationJobDetailAPI(APIView):
     throttle_classes = [GeneralThrottle]
+    serializer_class = ApplicationSerializer
 
     def get_permissions(self):
         if self.request.method == "GET":

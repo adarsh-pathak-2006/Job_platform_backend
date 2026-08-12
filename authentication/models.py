@@ -18,7 +18,7 @@ class Company(models.Model):
 class RecruiterProfile(models.Model):
     company=models.ForeignKey(Company, on_delete=models.CASCADE, related_name='recruiter_in_company')
     user=models.OneToOneField(User, on_delete=models.CASCADE)
-    display_name=models.CharField()
+    display_name=models.CharField(max_length=255)
     gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')], blank=True, null=True)
     created_at=models.DateTimeField(auto_now_add=True)
     
@@ -28,7 +28,7 @@ class RecruiterProfile(models.Model):
 
 class UserProfile(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE)
-    display_name=models.CharField()
+    display_name=models.CharField(max_length=255)
     bio=models.TextField(blank=True, null=True)
     gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')], blank=True, null=True)
     created_at=models.DateTimeField(auto_now_add=True)
@@ -44,11 +44,11 @@ class Resume(models.Model):
     resume_name=models.CharField(max_length=100)
     profile=models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='resumes')
     name=models.CharField(max_length=100)
-    gender=models.CharField(choices=[('MALE', 'Male'), ('FEMALE', 'Female')])
+    gender=models.CharField(max_length=10, choices=[('MALE', 'Male'), ('FEMALE', 'Female')])
     summary=models.TextField()
     education=models.TextField()
     linkedin=models.URLField(blank=True, null=True)
-    github=models.CharField(blank=True, null=True)
+    github=models.CharField(max_length=255, blank=True, null=True)
     twitter=models.URLField(blank=True, null=True)
 
     def __str__(self):

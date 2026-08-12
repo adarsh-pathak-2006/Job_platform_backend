@@ -22,6 +22,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 class RegisterAPI(APIView):
     throttle_classes=[RegisterUserThrottle]
+    serializer_class = RegisterSerializer
     def post(self, request):
         serial=RegisterSerializer(data=request.data)
         if serial.is_valid():
@@ -89,16 +90,22 @@ class MyProfile(RetrieveUpdateDestroyAPIView):
     throttle_classes=[GeneralThrottle]
     permission_classes=[IsRecruiterAndCandidate]
     def get_serializer_class(self):
-        if self.request.user.role=='Candidate':
+        if getattr(self, 'swagger_fake_view', False) or not self.request or not self.request.user.is_authenticated:
             return UserProfileWriteSerializer
-        elif self.request.user.role=='Recruiter':
-            return RecruiterProfileWriteSerializer  
+        if self.request.user.role == 'CANDIDATE' or self.request.user.role == 'Candidate':
+            return UserProfileWriteSerializer
+        elif self.request.user.role == 'RECRUITER' or self.request.user.role == 'Recruiter':
+            return RecruiterProfileWriteSerializer
+        return UserProfileWriteSerializer
 
     def get_object(self):
-        if self.request.user.role=='Candidate':
+        if getattr(self, 'swagger_fake_view', False) or not self.request or not self.request.user.is_authenticated:
+            return None
+        if self.request.user.role == 'CANDIDATE' or self.request.user.role == 'Candidate':
             return get_object_or_404(UserProfile, user=self.request.user)
-        elif self.request.user.role=='Recruiter':
-            return get_object_or_404(RecruiterProfile, user=self.request.user)       
+        elif self.request.user.role == 'RECRUITER' or self.request.user.role == 'Recruiter':
+            return get_object_or_404(RecruiterProfile, user=self.request.user)
+        return None
 
 class ResumeAPI(ListCreateAPIView):
     throttle_classes=[GeneralThrottle]
@@ -126,6 +133,7 @@ class ResumeDetailAPI(RetrieveUpdateDestroyAPIView):
 
 class ExperienceAPI(APIView):
     throttle_classes=[GeneralThrottle]
+    serializer_class = ExperienceSerializer
     def get_permissions(self):
         if self.request.method=='POST':
             return [IsCandidate()]
@@ -148,6 +156,7 @@ class ExperienceAPI(APIView):
 
 class ExperienceIndividualAPI(APIView):
     throttle_classes=[GeneralThrottle]
+    serializer_class = ExperienceSerializer
     def get_permissions(self):
         if self.request.method=='PUT' or self.request.method=='DELETE':
             return [IsCandidate()]
@@ -178,6 +187,7 @@ class ExperienceIndividualAPI(APIView):
 
 class ProjectAPI(ListCreateAPIView):
     throttle_classes=[GeneralThrottle]
+    serializer_class = ProjectSerializer
     def get_permissions(self):
         if self.request.method=='POST':
             return [IsCandidate()]
@@ -200,6 +210,7 @@ class ProjectAPI(ListCreateAPIView):
 
 class ProjectIndividualAPI(APIView):
     throttle_classes=[GeneralThrottle]
+    serializer_class = ProjectSerializer
     def get_permissions(self):
         if self.request.method=='PUT' or self.request.method=='DELETE':
             return [IsCandidate()]
