@@ -22,6 +22,22 @@ class RecruitmentAllAPI(ListCreateAPIView):
     serializer_class=RecruitmentSerializer
     queryset=Recruitment.objects.all()
 
+    def perform_create(self, serializer):
+        from authentication.models import RecruiterProfile, Company
+        from rest_framework.exceptions import ValidationError
+        try:
+            recruiter = RecruiterProfile.objects.get(user=self.request.user)
+        except RecruiterProfile.DoesNotExist:
+            # Auto-repair: create a default company and profile
+            user = self.request.user
+            name = f"{user.first_name} {user.last_name}".strip() or user.username
+            company = Company.objects.create(
+                name=f"{name}'s Company",
+                description="Update your company description in your profile."
+            )
+            recruiter = RecruiterProfile.objects.create(user=user, company=company)
+        serializer.save(profile=recruiter)
+
 class RecruitmentUpdateAPI(RetrieveUpdateDestroyAPIView):
     throttle_classes=[GeneralThrottle]
     def get_permissions(self):

@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from authentication.models import Company, RecruiterProfile, UserProfile, Resume, Experience, Project
-from authentication.serializers import RegisterSerializer, UserProfileWriteSerializer, UserProfileGetSerializer, CompanySerializer, RecruiterProfileGetSerializer, RecruiterProfileWriteSerializer, ResumeSerializer, ExperienceSerializer, ProjectSerializer
+from authentication.serializers import RegisterSerializer, UserProfileWriteSerializer, UserProfileGetSerializer, CompanySerializer, RecruiterProfileGetSerializer, RecruiterProfileWriteSerializer, ResumeSerializer, ExperienceSerializer, ProjectSerializer, CustomTokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework.response import Response
@@ -11,11 +11,11 @@ from rest_framework.permissions import IsAdminUser
 from job.throttling import GeneralThrottle, RegisterUserThrottle, TokenCreationThrottle, RefreshTokenCreationThrottle
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-
 User=get_user_model()
 
 class CustomTokenObtainView(TokenObtainPairView):
     throttle_classes=[TokenCreationThrottle]
+    serializer_class = CustomTokenObtainPairSerializer
 
 class CustomTokenRefreshView(TokenRefreshView):
     throttle_classes=[RefreshTokenCreationThrottle]
@@ -27,8 +27,8 @@ class RegisterAPI(APIView):
         serial=RegisterSerializer(data=request.data)
         if serial.is_valid():
             username=serial.validated_data['username']
-            f_name=serial.validated_data['first_name']
-            l_name=serial.validated_data['l_name']
+            f_name=serial.validated_data.get('first_name', '')
+            l_name=serial.validated_data.get('last_name', '')
             email=serial.validated_data['email']
             mobile_no=serial.validated_data['mobile_no']
             password=serial.validated_data['password']
@@ -37,10 +37,16 @@ class RegisterAPI(APIView):
             if User.objects.filter(Q(username=username) | Q(email=email) | Q(mobile_no=mobile_no)):
                 return Response({'message':'username or email or mobile_no already exists'}, status=400)
             user=User.objects.create_user(username=username, mobile_no=mobile_no, email=email, password=password, role=role, first_name=f_name, last_name=l_name)
-            if role=='Candidate':
+            if role.upper() == 'CANDIDATE':
                 UserProfile.objects.create(user=user)
-            elif role=='Recruiter':
-                RecruiterProfile.objects.create(user=user)
+            elif role.upper() == 'RECRUITER':
+                # Use provided company name or generate a default one
+                company_name = request.data.get('company_name', '').strip() or f"{f_name} {l_name}'s Company"
+                company = Company.objects.create(
+                    name=company_name,
+                    description="Update your company description in your profile."
+                )
+                RecruiterProfile.objects.create(user=user, company=company)
             return Response({'message':'user registered'}, status=201)
         return Response(serial.errors, status=400)
 
@@ -101,9 +107,10 @@ class MyProfile(RetrieveUpdateDestroyAPIView):
     def get_object(self):
         if getattr(self, 'swagger_fake_view', False) or not self.request or not self.request.user.is_authenticated:
             return None
-        if self.request.user.role == 'CANDIDATE' or self.request.user.role == 'Candidate':
-            return get_object_or_404(UserProfile, user=self.request.user)
-        elif self.request.user.role == 'RECRUITER' or self.request.user.role == 'Recruiter':
+        if self.request.user.role == 'CANDIDATE':
+            obj, _ = UserProfile.objects.get_or_create(user=self.request.user)
+            return obj
+        elif self.request.user.role == 'RECRUITER':
             return get_object_or_404(RecruiterProfile, user=self.request.user)
         return None
 
@@ -117,7 +124,11 @@ class ResumeAPI(ListCreateAPIView):
 
     def get_queryset(self):
         profile_data=UserProfile.objects.filter(user=self.request.user)
-        return Resume.objects.filter(profile=profile_data)
+        return Resume.objects.filter(profile__in=profile_data)
+        
+    def perform_create(self, serializer):
+        profile = get_object_or_404(UserProfile, user=self.request.user)
+        serializer.save(profile=profile)
 
 class ResumeDetailAPI(RetrieveUpdateDestroyAPIView):
     throttle_classes=[GeneralThrottle]
@@ -129,7 +140,7 @@ class ResumeDetailAPI(RetrieveUpdateDestroyAPIView):
     
     def get_queryset(self):
         profile_data=UserProfile.objects.filter(user=self.request.user)
-        return Resume.objects.filter(profile=profile_data)
+        return Resume.objects.filter(profile__in=profile_data)
 
 class ExperienceAPI(APIView):
     throttle_classes=[GeneralThrottle]

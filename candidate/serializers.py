@@ -16,4 +16,4 @@ class ApplicationWriteSerializer(ModelSerializer):
     class Meta:
         model=Application
         fields='__all__'
-        read_only_fields=['user']
+        read_only_fields=['user', 'resume']

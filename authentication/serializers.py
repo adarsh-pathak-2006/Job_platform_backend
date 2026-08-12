@@ -1,5 +1,14 @@
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from authentication.models import User, Company, RecruiterProfile, UserProfile, Resume, Experience, Project
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['role'] = user.role
+        token['username'] = user.username
+        return token
 
 class UserSerializer(ModelSerializer):
     class Meta:

@@ -78,24 +78,23 @@ class ApplicationCreateAPI(CreateAPIView):
     queryset = Application.objects.all()
 
     def perform_create(self, serializer):
-        profile = get_object_or_404(
-            UserProfile,
-            user=self.request.user
-        )
+        from authentication.models import Resume
+        profile = get_object_or_404(UserProfile, user=self.request.user)
+
+        # Auto-attach user's most recent resume
+        resume = Resume.objects.filter(profile=profile).order_by('-id').first()
+        if not resume:
+            raise ValidationError({'error': 'Please create a resume before applying for jobs.'})
+
         try:
-            application = serializer.save(user=profile)
+            application = serializer.save(user=profile, resume=resume)
         except IntegrityError:
             raise ValidationError({'detail': 'You have already applied for this job.'})
 
         # Candidate's application list is now outdated
-        cache.delete(
-            f"applicationUser_{profile.id}"
-        )
-
+        cache.delete(f"applicationUser_{profile.id}")
         # Job's application list is now outdated
-        cache.delete(
-            f"applicationsJob_{application.job_id}"
-        )
+        cache.delete(f"applicationsJob_{application.job_id}")
 
 
 class ApplicationUserDetailAPI(APIView):
